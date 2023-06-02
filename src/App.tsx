@@ -1,10 +1,12 @@
-import { Navigation } from './components';
-import './App.css';
+import { Navigation, Logo, InputForm } from "./components";
+import "./App.css";
 
 function App() {
   return (
     <>
       <Navigation />
+      <Logo />
+      <InputForm />
     </>
   );
 }
