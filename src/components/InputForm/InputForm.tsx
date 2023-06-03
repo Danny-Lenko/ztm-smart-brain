@@ -1,6 +1,14 @@
 import "./InputForm.css";
 
-export const InputForm: React.FC = () => {
+type Props = {
+  onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onButtonSubmit: () => void;
+};
+
+export const InputForm: React.FC<Props> = ({
+  onInputChange,
+  onButtonSubmit,
+}) => {
   return (
     <div>
       <p className="f3">
@@ -11,11 +19,12 @@ export const InputForm: React.FC = () => {
           <input
             className="f4 pa2 w-70 center"
             type="tex"
-            // onChange={onInputChange}
+            placeholder="Enter your name"
+            onChange={onInputChange}
           />
           <button
             className="w-30 grow f4 link ph3 pv2 dib white bg-light-purple"
-            // onClick={onButtonSubmit}
+            onClick={onButtonSubmit}
           >
             Detect
           </button>
