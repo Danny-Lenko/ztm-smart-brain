@@ -3,12 +3,16 @@ import "./InputForm.css";
 type Props = {
   onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onButtonSubmit: () => void;
+  buttonIsActive: boolean;
 };
 
 export const InputForm: React.FC<Props> = ({
   onInputChange,
   onButtonSubmit,
+  buttonIsActive,
 }) => {
+  console.log(buttonIsActive)
+
   return (
     <div>
       <p className="f3">
@@ -23,8 +27,9 @@ export const InputForm: React.FC<Props> = ({
             onChange={onInputChange}
           />
           <button
-            className="w-30 grow f4 link ph3 pv2 dib white bg-light-purple"
+            className="w-30 grow f4 link ph3 pv2 dib white bg-light-purple submit-btn"
             onClick={onButtonSubmit}
+            disabled={!buttonIsActive}
           >
             Detect
           </button>

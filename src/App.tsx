@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Navigation,
   Logo,
@@ -17,35 +17,20 @@ const APP_ID = "my-first-application";
 // Change these to whatever model and image URL you want to use
 const MODEL_ID = "face-detection";
 // const MODEL_VERSION_ID = "aa7f35c01e0642fda5cf400f543e7c40";
-const IMAGE_URL = "https://samples.clarifai.com/metro-north.jpg";
 
-const raw = JSON.stringify({
-  user_app_id: {
-    user_id: USER_ID,
-    app_id: APP_ID,
-  },
-  inputs: [
-    {
-      data: {
-        image: {
-          url: IMAGE_URL,
-        },
-      },
-    },
-  ],
-});
-
-const requestOptions = {
-  method: "POST",
-  headers: {
-    Accept: "application/json",
-    Authorization: "Key " + PAT,
-  },
-  body: raw,
+export type FaceCoords = {
+  leftCol: number;
+  topRow: number;
+  rightCol: number;
+  bottomRow: number;
 };
 
 function App() {
   const [inputValue, setInputValue] = useState("");
+  const [imageWidth, setImageWidth] = useState(0);
+  const [imageHeight, setImageHeight] = useState(0);
+  const [buttonIsActive, setButtonIsActive] = useState(false);
+  const [faceBox, setFaceBox] = useState<FaceCoords | null>(null);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const target = event.target;
@@ -59,9 +44,69 @@ function App() {
       requestOptions
     )
       .then((response) => response.json())
-      .then((result) => console.log(result))
+      .then((result) => calculateFaceLocation(result))
       .catch((error) => console.log("error", error));
   };
+
+  const calculateFaceLocation = (data: any) => {
+    const clarifaiCoords =
+      data.outputs[0].data.regions[0].region_info.bounding_box;
+
+    const faceCoords = {
+      leftCol: clarifaiCoords.left_col * imageWidth,
+      topRow: clarifaiCoords.top_row * imageHeight,
+      rightCol: imageWidth - clarifaiCoords.right_col * imageWidth,
+      bottomRow: imageHeight - clarifaiCoords.bottom_row * imageHeight,
+    };
+
+    setFaceBox(faceCoords);
+  };
+
+  const raw = JSON.stringify({
+    user_app_id: {
+      user_id: USER_ID,
+      app_id: APP_ID,
+    },
+    inputs: [
+      {
+        data: {
+          image: {
+            url: inputValue,
+          },
+        },
+      },
+    ],
+  });
+
+  const requestOptions = {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      Authorization: "Key " + PAT,
+    },
+    body: raw,
+  };
+
+  const getImage = (image: HTMLImageElement) => {
+    const width = image.clientWidth;
+    const height = image.clientHeight;
+
+    if (width && height) {
+      setImageWidth(width);
+      setImageHeight(height);
+    } else {
+      setImageWidth(0);
+      setImageHeight(0);
+    }
+  };
+
+  useEffect(() => {
+    if (imageWidth && imageHeight) {
+      setButtonIsActive(true);
+    } else {
+      setButtonIsActive(false);
+    }
+  }, [imageWidth, imageHeight]);
 
   return (
     <div className="app">
@@ -71,8 +116,13 @@ function App() {
       <InputForm
         onInputChange={handleInputChange}
         onButtonSubmit={handleSubmit}
+        buttonIsActive={buttonIsActive}
       />
-      <FaceRecognition imageUrl={inputValue} />
+      <FaceRecognition
+        imageUrl={inputValue}
+        getImage={getImage}
+        box={faceBox}
+      />
 
       <ParticlesBg type="cobweb" bg={true} num={200} color={"#ffffff"} />
     </div>
