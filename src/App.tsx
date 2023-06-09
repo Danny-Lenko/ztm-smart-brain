@@ -113,6 +113,7 @@ function App() {
 
   return (
     <div className="app">
+      <ParticlesBg type="cobweb" bg={true} num={200} color={"#ffffff"} />
       <Navigation changePath={changePath} path={path} />
       {path === "signin" ? (
         <SignIn changePath={changePath} />
@@ -132,8 +133,6 @@ function App() {
             getImage={getImage}
             box={faceBox}
           />
-
-          <ParticlesBg type="cobweb" bg={true} num={200} color={"#ffffff"} />
         </>
       )}
     </div>
